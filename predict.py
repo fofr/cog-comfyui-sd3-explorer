@@ -95,6 +95,7 @@ class Predictor(BasePredictor):
         model: str = Input(
             choices=SD3_MODELS,
             default="sd3_medium_incl_clips_t5xxlfp16.safetensors",
+            description="Pick whether to use T5-XXL in fp16, fp8 or not at all",
         ),
         width: int = Input(
             description="The width of the image",
@@ -161,7 +162,7 @@ class Predictor(BasePredictor):
         ),
         negative_conditioning_end: float = Input(
             description="When the negative conditioning should stop being applied. By default it is disabled.",
-            le=20,
+            le=1,
             ge=0,
             default=0,
         ),
@@ -208,6 +209,7 @@ class Predictor(BasePredictor):
         )
 
         self.comfyUI.connect()
+        self.comfyUI.handle_weights(workflow)
         self.comfyUI.run_workflow(workflow)
 
         return optimise_images.optimise_image_files(
