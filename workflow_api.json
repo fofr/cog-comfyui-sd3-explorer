@@ -63,7 +63,7 @@
         0
       ],
       "positive": [
-        "6",
+        "291",
         0
       ],
       "negative": [
@@ -128,6 +128,22 @@
     "class_type": "CLIPTextEncode",
     "_meta": {
       "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "291": {
+    "inputs": {
+      "clip_l": "",
+      "clip_g": "a cat with its mouth open",
+      "t5xxl": "the word \"WOW\"",
+      "empty_padding": "none",
+      "clip": [
+        "252",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncodeSD3",
+    "_meta": {
+      "title": "CLIPTextEncodeSD3"
     }
   }
 }

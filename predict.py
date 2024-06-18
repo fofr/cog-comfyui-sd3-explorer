@@ -17,7 +17,6 @@ ALL_DIRECTORIES = [OUTPUT_DIR, INPUT_DIR, COMFYUI_TEMP_OUTPUT_DIR]
 
 mimetypes.add_type("image/webp", ".webp")
 
-# Save your example JSON to the same directory as predict.py
 api_json_file = "workflow_api.json"
 
 SD3_MODELS = [
@@ -74,6 +73,18 @@ class Predictor(BasePredictor):
         empty_latent_image["width"] = kwargs["width"]
         empty_latent_image["height"] = kwargs["height"]
         empty_latent_image["batch_size"] = kwargs["number_of_images"]
+
+        if kwargs["use_triple_prompt"]:
+            triple_prompt = workflow["291"]["inputs"]
+            triple_prompt["clip_g"] = kwargs["triple_prompt_clip_g"]
+            triple_prompt["clip_l"] = kwargs["triple_prompt_clip_l"]
+            triple_prompt["t5xxl"] = kwargs["triple_prompt_t5"]
+            triple_prompt["empty_padding"] = (
+                "empty_prompt" if kwargs["triple_prompt_empty_padding"] else "none"
+            )
+        else:
+            del workflow["291"]
+            sampler["positive"] = ["6", 0]
 
     def predict(
         self,
