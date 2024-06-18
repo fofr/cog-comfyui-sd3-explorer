@@ -1,15 +1,14 @@
 # An example of how to convert a given API workflow into its own Replicate model
 # Replace predict.py with this file when building your own workflow
 
-import os
 import mimetypes
 import json
-from PIL import Image, ExifTags
 from typing import List
 from cog import BasePredictor, Input, Path
 from comfyui import ComfyUI
 from cog_model_helpers import optimise_images
 from cog_model_helpers import seed as seed_helper
+from comfyui_enums import SAMPLERS, SCHEDULERS
 
 OUTPUT_DIR = "/tmp/outputs"
 INPUT_DIR = "/tmp/inputs"
@@ -20,6 +19,12 @@ mimetypes.add_type("image/webp", ".webp")
 
 # Save your example JSON to the same directory as predict.py
 api_json_file = "workflow_api.json"
+
+SD3_MODELS = [
+    "sd3_medium_incl_clips.safetensors",
+    "sd3_medium_incl_clips_t5xxlfp16.safetensors",
+    "sd3_medium_incl_clips_t5xxlfp8.safetensors",
+]
 
 
 class Predictor(BasePredictor):
@@ -39,74 +44,115 @@ class Predictor(BasePredictor):
         self,
         input_file: Path,
         filename: str = "image.png",
-        check_orientation: bool = True,
     ):
-        image = Image.open(input_file)
-
-        if check_orientation:
-            try:
-                for orientation in ExifTags.TAGS.keys():
-                    if ExifTags.TAGS[orientation] == "Orientation":
-                        break
-                exif = dict(image._getexif().items())
-
-                if exif[orientation] == 3:
-                    image = image.rotate(180, expand=True)
-                elif exif[orientation] == 6:
-                    image = image.rotate(270, expand=True)
-                elif exif[orientation] == 8:
-                    image = image.rotate(90, expand=True)
-            except (KeyError, AttributeError):
-                # EXIF data does not have orientation
-                # Do not rotate
-                pass
-
-        image.save(os.path.join(INPUT_DIR, filename))
-
-    def aspect_ratio_to_width_height(self, aspect_ratio: str):
-        aspect_ratios = {
-            "1:1": (1024, 1024),
-            "16:9": (1344, 768),
-            "21:9": (1536, 640),
-            "3:2": (1216, 832),
-            "2:3": (832, 1216),
-            "4:5": (896, 1088),
-            "5:4": (1088, 896),
-            "9:16": (768, 1344),
-            "9:21": (640, 1536),
-        }
-        return aspect_ratios.get(aspect_ratio)
+        pass
 
     def update_workflow(self, workflow, **kwargs):
+        checkpoint_loader = workflow["252"]["inputs"]
+        checkpoint_loader["ckpt_name"] = kwargs["model"]
+
+        shift = workflow["13"]["inputs"]
+        shift["shift"] = kwargs["shift"]
+
         positive_prompt = workflow["6"]["inputs"]
         positive_prompt["text"] = kwargs["prompt"]
+
         negative_prompt = workflow["71"]["inputs"]
         negative_prompt["text"] = kwargs["negative_prompt"]
+
         sampler = workflow["271"]["inputs"]
         sampler["seed"] = kwargs["seed"]
-        sampler["cfg"] = kwargs["cfg"]
+        sampler["cfg"] = kwargs["guidance_scale"]
+        sampler["scheduler"] = kwargs["scheduler"]
+        sampler["sampler_name"] = kwargs["sampler"]
+        sampler["steps"] = kwargs["steps"]
+
+        negative_conditioning = workflow["274"]["inputs"]
+        negative_conditioning["end"] = kwargs["negative_conditioning_end"]
+
         empty_latent_image = workflow["135"]["inputs"]
         empty_latent_image["width"] = kwargs["width"]
         empty_latent_image["height"] = kwargs["height"]
+        empty_latent_image["batch_size"] = kwargs["number_of_images"]
 
     def predict(
         self,
         prompt: str = Input(
             default="",
+            description="This prompt is ignored when using the triple prompt mode. See below.",
         ),
-        negative_prompt: str = Input(
-            description="Things you do not want to see in your image",
-            default="",
+        model: str = Input(
+            choices=SD3_MODELS,
+            default="sd3_medium_incl_clips_t5xxlfp16.safetensors",
         ),
-        aspect_ratio: str = Input(
-            choices=["1:1", "16:9", "21:9", "2:3", "3:2", "4:5", "5:4", "9:16", "9:21"],
-            default="1:1",
+        width: int = Input(
+            description="The width of the image",
+            default=1024,
         ),
-        cfg: float = Input(
+        height: int = Input(
+            description="The height of the image",
+            default=1024,
+        ),
+        steps: int = Input(
+            description="The number of steps to run the diffusion model for",
+            default=28,
+        ),
+        sampler: str = Input(
+            description="The sampler to use for the diffusion model",
+            choices=SAMPLERS,
+            default="dpmpp_2m",
+        ),
+        scheduler: str = Input(
+            description="The scheduler to use for the diffusion model",
+            choices=SCHEDULERS,
+            default="sgm_uniform",
+        ),
+        shift: float = Input(
+            description="The timestep scheduling shift. Try values 6.0 and 2.0 to experiment with effects.",
+            le=20,
+            ge=0,
+            default=3.0,
+        ),
+        guidance_scale: float = Input(
             description="The guidance scale tells the model how similar the output should be to the prompt.",
             le=20,
             ge=0,
             default=4.5,
+        ),
+        number_of_images: int = Input(
+            description="The number of images to generate",
+            le=10,
+            ge=1,
+            default=1,
+        ),
+        use_triple_prompt: bool = Input(
+            default=False,
+        ),
+        triple_prompt_clip_g: str = Input(
+            description="The prompt that will be passed to just the CLIP-G model.",
+            default="",
+        ),
+        triple_prompt_clip_l: str = Input(
+            description="The prompt that will be passed to just the CLIP-L model.",
+            default="",
+        ),
+        triple_prompt_t5: str = Input(
+            description="The prompt that will be passed to just the T5-XXL model.",
+            default="",
+        ),
+        triple_prompt_empty_padding: bool = Input(
+            description="Whether to add padding for empty prompts. Useful if you only want to pass a prompt to one or two of the three text encoders. Has no effect when all prompts are filled. Disable this for interesting effects.",
+            default=True,
+        ),
+        negative_prompt: str = Input(
+            description="Negative prompts do not really work in SD3. This will simply cause your output image to vary in unpredictable ways.",
+            default="",
+        ),
+        negative_conditioning_end: float = Input(
+            description="When the negative conditioning should stop being applied. By default it is disabled.",
+            le=20,
+            ge=0,
+            default=0,
         ),
         output_format: str = optimise_images.predict_output_format(),
         output_quality: int = optimise_images.predict_output_quality(),
@@ -119,16 +165,35 @@ class Predictor(BasePredictor):
         with open(api_json_file, "r") as file:
             workflow = json.loads(file.read())
 
-        width, height = self.aspect_ratio_to_width_height(aspect_ratio)
+        if (
+            use_triple_prompt
+            and triple_prompt_t5
+            and model == "sd3_medium_incl_clips.safetensors"
+        ):
+            print(
+                "WARNING: The T5 prompt will be ignored because the sd3_medium_incl_clips.safetensors model does not include a T5 encoder"
+            )
 
         self.update_workflow(
             workflow,
             prompt=prompt,
-            negative_prompt=negative_prompt,
+            model=model,
             seed=seed,
-            cfg=cfg,
             width=width,
             height=height,
+            shift=shift,
+            steps=steps,
+            sampler=sampler,
+            scheduler=scheduler,
+            guidance_scale=guidance_scale,
+            number_of_images=number_of_images,
+            use_triple_prompt=use_triple_prompt,
+            triple_prompt_clip_g=triple_prompt_clip_g,
+            triple_prompt_clip_l=triple_prompt_clip_l,
+            triple_prompt_t5=triple_prompt_t5,
+            triple_prompt_empty_padding=triple_prompt_empty_padding,
+            negative_prompt=negative_prompt,
+            negative_conditioning_end=negative_conditioning_end,
         )
 
         self.comfyUI.connect()

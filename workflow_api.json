@@ -1,7 +1,7 @@
 {
   "6": {
     "inputs": {
-      "text": "",
+      "text": "positive",
       "clip": [
         "252",
         1
@@ -25,86 +25,6 @@
       "title": "ModelSamplingSD3"
     }
   },
-  "67": {
-    "inputs": {
-      "conditioning": [
-        "71",
-        0
-      ]
-    },
-    "class_type": "ConditioningZeroOut",
-    "_meta": {
-      "title": "ConditioningZeroOut"
-    }
-  },
-  "68": {
-    "inputs": {
-      "start": 0.1,
-      "end": 1,
-      "conditioning": [
-        "67",
-        0
-      ]
-    },
-    "class_type": "ConditioningSetTimestepRange",
-    "_meta": {
-      "title": "ConditioningSetTimestepRange"
-    }
-  },
-  "69": {
-    "inputs": {
-      "conditioning_1": [
-        "68",
-        0
-      ],
-      "conditioning_2": [
-        "70",
-        0
-      ]
-    },
-    "class_type": "ConditioningCombine",
-    "_meta": {
-      "title": "Conditioning (Combine)"
-    }
-  },
-  "70": {
-    "inputs": {
-      "start": 0,
-      "end": 0.1,
-      "conditioning": [
-        "71",
-        0
-      ]
-    },
-    "class_type": "ConditioningSetTimestepRange",
-    "_meta": {
-      "title": "ConditioningSetTimestepRange"
-    }
-  },
-  "71": {
-    "inputs": {
-      "text": "bad quality, poor quality, doll, disfigured, jpg, toy, bad anatomy, missing limbs, missing fingers, 3d, cgi",
-      "clip": [
-        "252",
-        1
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Negative Prompt)"
-    }
-  },
-  "135": {
-    "inputs": {
-      "width": 1024,
-      "height": 1024,
-      "batch_size": 1
-    },
-    "class_type": "EmptySD3LatentImage",
-    "_meta": {
-      "title": "EmptySD3LatentImage"
-    }
-  },
   "231": {
     "inputs": {
       "samples": [
@@ -123,7 +43,7 @@
   },
   "252": {
     "inputs": {
-      "ckpt_name": "sd3_medium_incl_clips_t5xxlfp8.safetensors"
+      "ckpt_name": "sd3_medium_incl_clips_t5xxlfp16.safetensors"
     },
     "class_type": "CheckpointLoaderSimple",
     "_meta": {
@@ -132,10 +52,10 @@
   },
   "271": {
     "inputs": {
-      "seed": 130541990665798,
-      "steps": 28,
-      "cfg": 4.5,
-      "sampler_name": "dpmpp_2m",
+      "seed": 907069549108851,
+      "steps": 15,
+      "cfg": 3.5,
+      "sampler_name": "dpm_2",
       "scheduler": "sgm_uniform",
       "denoise": 1,
       "model": [
@@ -147,11 +67,11 @@
         0
       ],
       "negative": [
-        "69",
+        "274",
         0
       ],
       "latent_image": [
-        "135",
+        "275",
         0
       ]
     },
@@ -162,7 +82,7 @@
   },
   "273": {
     "inputs": {
-      "filename_prefix": "R8_SD3",
+      "filename_prefix": "SD3",
       "images": [
         "231",
         0
@@ -171,6 +91,43 @@
     "class_type": "SaveImage",
     "_meta": {
       "title": "Save Image"
+    }
+  },
+  "274": {
+    "inputs": {
+      "end": 0,
+      "conditioning": [
+        "289",
+        0
+      ]
+    },
+    "class_type": "SD3NegativeConditioning+",
+    "_meta": {
+      "title": "🔧 SD3 Negative Conditioning"
+    }
+  },
+  "275": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "289": {
+    "inputs": {
+      "text": "negative",
+      "clip": [
+        "252",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
     }
   }
 }
