@@ -112,9 +112,9 @@
       "height": 1024,
       "batch_size": 1
     },
-    "class_type": "EmptyLatentImage",
+    "class_type": "EmptySD3LatentImage",
     "_meta": {
-      "title": "Empty Latent Image"
+      "title": "Empty SD3 Latent Image"
     }
   },
   "289": {

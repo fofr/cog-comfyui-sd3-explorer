@@ -56,7 +56,7 @@ class Predictor(BasePredictor):
         positive_prompt = workflow["6"]["inputs"]
         positive_prompt["text"] = kwargs["prompt"]
 
-        negative_prompt = workflow["71"]["inputs"]
+        negative_prompt = workflow["289"]["inputs"]
         negative_prompt["text"] = kwargs["negative_prompt"]
 
         sampler = workflow["271"]["inputs"]
@@ -69,7 +69,7 @@ class Predictor(BasePredictor):
         negative_conditioning = workflow["274"]["inputs"]
         negative_conditioning["end"] = kwargs["negative_conditioning_end"]
 
-        empty_latent_image = workflow["135"]["inputs"]
+        empty_latent_image = workflow["275"]["inputs"]
         empty_latent_image["width"] = kwargs["width"]
         empty_latent_image["height"] = kwargs["height"]
         empty_latent_image["batch_size"] = kwargs["number_of_images"]
