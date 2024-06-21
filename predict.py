@@ -95,41 +95,41 @@ class Predictor(BasePredictor):
         model: str = Input(
             choices=SD3_MODELS,
             default="sd3_medium_incl_clips_t5xxlfp16.safetensors",
-            description="Pick whether to use T5-XXL in fp16, fp8 or not at all",
+            description="Pick whether to use T5-XXL in fp16, fp8 or not at all. We recommend fp16 for this model as it has the best image quality. When running locally we recommend fp8 for lower memory usage. We've included all versions here for exploration.",
         ),
         width: int = Input(
-            description="The width of the image",
+            description="The width of the image (best output at ~1 megapixel. Resolution must be divisible by 64)",
             default=1024,
         ),
         height: int = Input(
-            description="The height of the image",
+            description="The height of the image (best output at ~1 megapixel. Resolution must be divisible by 64)",
             default=1024,
         ),
         steps: int = Input(
-            description="The number of steps to run the diffusion model for",
+            description="The number of steps to run the diffusion model for (more steps = better image but slower generation. Best results for this model are around 26 to 36 steps.)",
             default=28,
         ),
         sampler: str = Input(
-            description="The sampler to use for the diffusion model",
+            description="The sampler to use for the diffusion model (used to manage noise)",
             choices=SAMPLERS,
             default="dpmpp_2m",
         ),
         scheduler: str = Input(
-            description="The scheduler to use for the diffusion model",
+            description="The scheduler to use for the diffusion model (used to manage noise; do not use karras)",
             choices=SCHEDULERS,
             default="sgm_uniform",
         ),
         shift: float = Input(
-            description="The timestep scheduling shift. Try values 6.0 and 2.0 to experiment with effects.",
+            description="The timestep scheduling shift; shift values higher than 1.0 are better at managing noise in higher resolutions. Try values 6.0 and 2.0 to experiment with effects.",
             le=20,
             ge=0,
             default=3.0,
         ),
         guidance_scale: float = Input(
-            description="The guidance scale tells the model how similar the output should be to the prompt.",
+            description="The guidance scale tells the model how similar the output should be to the prompt. (Recommend between 3.5 and 4.5; if images look 'burnt,' lower the value.)",
             le=20,
             ge=0,
-            default=4.5,
+            default=3.5,
         ),
         number_of_images: int = Input(
             description="The number of images to generate",
