@@ -120,7 +120,7 @@ class Predictor(BasePredictor):
             default="sgm_uniform",
         ),
         shift: float = Input(
-            description="The timestep scheduling shift; higher shift values are better at managing noise in higher resolutions. Try values 6.0 and 2.0 to experiment with effects.",
+            description="The timestep scheduling shift; shift values higher than 1.0 are better at managing noise in higher resolutions. Try values 6.0 and 2.0 to experiment with effects.",
             le=20,
             ge=0,
             default=3.0,
