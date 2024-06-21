@@ -106,16 +106,16 @@ class Predictor(BasePredictor):
             default=1024,
         ),
         steps: int = Input(
-            description="The number of steps to run the diffusion model for (more steps = better image but slower generation. Best results for this model are around 26 to 36 steps.)",
+            description="The number of steps to run the model for (more steps = better image but slower generation. Best results for this model are around 26 to 36 steps.)",
             default=28,
         ),
         sampler: str = Input(
-            description="The sampler to use for the diffusion model (used to manage noise)",
+            description="The sampler to use (used to manage noise)",
             choices=SAMPLERS,
             default="dpmpp_2m",
         ),
         scheduler: str = Input(
-            description="The scheduler to use for the diffusion model (used to manage noise; do not use karras)",
+            description="The scheduler to use (used to manage noise; do not use karras)",
             choices=SCHEDULERS,
             default="sgm_uniform",
         ),
@@ -161,7 +161,7 @@ class Predictor(BasePredictor):
             default="",
         ),
         negative_conditioning_end: float = Input(
-            description="When the negative conditioning should stop being applied. By default it is disabled.",
+            description="When the negative conditioning should stop being applied. By default it is disabled. If you want to try a negative prompt, start with a value of 0.1",
             le=1,
             ge=0,
             default=0,
