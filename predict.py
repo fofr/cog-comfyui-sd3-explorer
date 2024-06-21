@@ -129,7 +129,7 @@ class Predictor(BasePredictor):
             description="The guidance scale tells the model how similar the output should be to the prompt. (Recommend between 3.5 and 4.5; if images look 'burnt,' lower the value.)",
             le=20,
             ge=0,
-            default=4.5,
+            default=3.5,
         ),
         number_of_images: int = Input(
             description="The number of images to generate",
