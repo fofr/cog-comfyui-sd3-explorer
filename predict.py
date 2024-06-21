@@ -95,7 +95,7 @@ class Predictor(BasePredictor):
         model: str = Input(
             choices=SD3_MODELS,
             default="sd3_medium_incl_clips_t5xxlfp16.safetensors",
-            description="Pick whether to use T5-XXL in fp16, fp8 or not at all. We recommend fp8 for simplicity and best results. fp16 improves image quality at the cost of higher memory usage.",
+            description="Pick whether to use T5-XXL in fp16, fp8 or not at all. We recommend fp16 for this model as it has the best image quality. When running locally we recommend fp8 for lower memory usage. We've included all versions here for exploration.",
         ),
         width: int = Input(
             description="The width of the image (best output at ~1 megapixel. Resolution must be divisible by 64)",
