@@ -106,7 +106,7 @@ class Predictor(BasePredictor):
             default=1024,
         ),
         steps: int = Input(
-            description="The number of steps to run the diffusion model for (more steps = better image but slower generation. Best results for this model around 26 to 36 steps.)",
+            description="The number of steps to run the diffusion model for (more steps = better image but slower generation. Best results for this model are around 26 to 36 steps.)",
             default=28,
         ),
         sampler: str = Input(
